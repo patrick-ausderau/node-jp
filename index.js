@@ -4,6 +4,7 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const db = require('./db');
 
 const Schema = mongoose.Schema;
 
@@ -21,12 +22,7 @@ const userSchema = new Schema({
 
 const user = mongoose.model('User', userSchema);
 
-mongoose.connect(process.env.DB_URL, {useNewUrlParser: true}).then(() => {
-  console.log('Connected successfully.');
-  app.listen(process.env.PORT);
-}, err => {
-  console.log('Connection to db failed: ' + err);
-});
+db.on('connected', () => app.listen(process.env.PORT));
 
 app.post('/user', (req, res) => {
   console.log('data from http post', req.body);
