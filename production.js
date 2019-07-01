@@ -2,11 +2,7 @@ module.exports = (app, port) => {
   console.log('production server on:', port);
   app.enable('trust proxy');
 
-  app.listen(port);
-};
-
-const redirect = (app) => {
-app.use((req, res, next) => {
+  app.use((req, res, next) => {
     if (req.secure) {
       console.log('req secure, nothing to do');
       next();
@@ -16,5 +12,6 @@ app.use((req, res, next) => {
       res.redirect(301, `https://${req.headers.host}${proxypath}${req.url}`);
     }
   });
-}
- 
+
+  app.listen(port);
+};

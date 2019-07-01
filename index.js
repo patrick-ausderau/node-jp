@@ -25,38 +25,9 @@ db.on('connected', () => {
   if(process.env.NODE_ENV === 'development') {
     require('./localhost')(app, process.env.HTTPS, process.env.PORT);
   } else {
-    console.log('production server on port:', process.env.PORT);
-    app.enable('trust proxy');
-    app.listen(process.env.PORT);
-
-    /*app.use((req, res, next) => {
-      if (req.secure) {
-        console.log('req secure, nothing to do');
-        next();
-      } else {
-        console.log('req unsecure, force redirect');
-        const proxypath = process.env.PROXY_PASS || '' 
-        res.redirect(301, `https://${req.headers.host}${proxypath}${req.url}`);
-      }
-    });
-
-    const prod =require('./production')(app, process.env.PORT);*/
+    require('./production')(app, process.env.PORT);
   }
 });
-
-if(process.env.NODE_ENV === 'production') {
-  console.log('redirect out of db callback? maybe?');
-  app.use((req, res, next) => {
-    if (req.secure) {
-      console.log('req secure, nothing to do');
-      next();
-    } else {
-      console.log('req unsecure, force redirect');
-      const proxypath = process.env.PROXY_PASS || '' 
-      res.redirect(301, `https://${req.headers.host}${proxypath}${req.url}`);
-    }
-  });
-}
 
 app.use(bodyParser.urlencoded({extended: false}));
 
