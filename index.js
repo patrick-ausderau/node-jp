@@ -25,7 +25,21 @@ db.on('connected', () => {
   if(process.env.NODE_ENV === 'development') {
     require('./localhost')(app, process.env.HTTPS, process.env.PORT);
   } else {
-    app.use((req, res, next) => {
+    console.log('production server on port:', process.env.PORT);
+    app.enable('trust proxy');
+    app.use ((req, res, next) => {
+      if (req.secure) {
+        console.log('req secure, nothing to do');
+        next();
+      } else {
+        console.log('req unsecure, redirect');
+        const proxypath = process.env.PROXY_PASS || '/nodepatricka'
+        res.redirect(301, `https://${req.headers.host}${proxypath}${req.url}`);
+      }
+    });
+    app.listen(process.env.PORT);
+
+    /*app.use((req, res, next) => {
       if (req.secure) {
         console.log('req secure, nothing to do');
         next();
@@ -36,7 +50,7 @@ db.on('connected', () => {
       }
     });
 
-    const prod =require('./production')(app, process.env.PORT);
+    const prod =require('./production')(app, process.env.PORT);*/
   }
 });
 
