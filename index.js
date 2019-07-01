@@ -25,7 +25,9 @@ db.on('connected', () => {
   if(process.env.NODE_ENV === 'development') {
     require('./localhost')(app, process.env.HTTPS, process.env.PORT);
   } else {
-    require('./production')(app, process.env.PORT);
+    const prod =require('./production');
+    prod.redirect(app);
+    prod.trust_listen(app, process.env.PORT);
   }
 });
 
