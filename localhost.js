@@ -11,6 +11,7 @@ const options = {
 };
 
 module.exports = (app, httpsPort, httpPort) => {
+  console.log('localhost server on https and http', httpsPort, httpPort);
   https.createServer(options, app).listen(httpsPort);
   http.createServer((req, res) => {
     res.writeHead(301, { 'Location': `https://localhost:${httpsPort}${req.url}` });
