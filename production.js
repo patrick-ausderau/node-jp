@@ -1,4 +1,5 @@
 module.exports = (app, port) => {
+  console.log('production server on:', port);
   app.enable('trust proxy');
 
   app.use ((req, res, next) => {
