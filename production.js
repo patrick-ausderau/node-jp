@@ -1,11 +1,11 @@
- module.exports.trust_listen = (app, port) => {
+module.exports = (app, port) => {
   console.log('production server on:', port);
   app.enable('trust proxy');
 
   app.listen(port);
 };
 
-module.exports.redirect = (app) => {
+const redirect = (app) => {
 app.use((req, res, next) => {
     if (req.secure) {
       console.log('req secure, nothing to do');
@@ -17,4 +17,4 @@ app.use((req, res, next) => {
     }
   });
 }
-
+ 

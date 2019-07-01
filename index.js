@@ -25,9 +25,18 @@ db.on('connected', () => {
   if(process.env.NODE_ENV === 'development') {
     require('./localhost')(app, process.env.HTTPS, process.env.PORT);
   } else {
-    const prod =require('./production');
-    prod.redirect(app);
-    prod.trust_listen(app, process.env.PORT);
+    app.use((req, res, next) => {
+      if (req.secure) {
+        console.log('req secure, nothing to do');
+        next();
+      } else {
+        console.log('req unsecure, force redirect');
+        const proxypath = process.env.PROXY_PASS || '' 
+        res.redirect(301, `https://${req.headers.host}${proxypath}${req.url}`);
+      }
+    });
+
+    const prod =require('./production')(app, process.env.PORT);
   }
 });
 
