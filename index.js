@@ -6,20 +6,47 @@ const bodyParser = require('body-parser');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const db = require('./db');
+const bcrypt = require('bcrypt');
+const session = require('express-session');
+
+const saltRound = 12;
 
 passport.use(new LocalStrategy(
   (username, password, done) => {
-    if (username !== process.env.username || password !== process.env.password) {
+    console.log('login...', username, process.env.username);
+    if (username !== process.env.username || 
+        !bcrypt.compareSync(password, process.env.password)) {
+      console.log('login failed...');
       done(null, false, {message: 'Incorrect credentials.'});
       return;
     }
+    console.log('login ok ☺');
     return done(null, {username: username}); // returned object usally contains something to identify the user
   }
 ));
 
+// data put in passport cookies needs to be serialized
+passport.serializeUser((user, done) => {
+  done(null, user);
+});
+
+passport.deserializeUser((user, done) => {
+  done(null, user);
+});
+
 const app = express();
+
+app.use(session({
+  secret: 'some s3cr3t value',
+  resave: true,
+  saveUninitialized: true,
+  cookie: { secure: true, // only over https
+    maxAge: 2 * 60 * 60 * 1000} // 2 hours
+}));
+
 app.use(express.static('public'));
 app.use(passport.initialize());
+app.use(passport.session());
 
 db.on('connected', () => {
   if(process.env.NODE_ENV === 'development') {
@@ -37,13 +64,14 @@ app.use('/user', require('./user/routes'));
 app.post('/login', 
   passport.authenticate('local', { 
     successRedirect: '/', 
-    failureRedirect: '/login.html', 
-    session: false })
+    failureRedirect: '/login.html'
+  })
 );
 
 app.get('/', (req, res) => {
   if(req.secure) {
-    res.send('Hello SECURE World from Patrick');
+    const userdata = req.user.username;
+    res.send(`Hello ${userdata}, this is SECURE app from Patrick`);
   } else {
     res.send('Hello Unsecure world ☹');
   }
